@@ -51,14 +51,14 @@ public class DatabaseConnection {
     public User getUserId(String _username, String _password){
         User u;
         try{
-            String sql = "SELECT id, name, lastname, email, username FROM users WHERE (username = ? OR email = ?) AND password = ?";
+            String sql = "SELECT id, name, lastname, email, username, avatar_url FROM users WHERE (username = ? OR email = ?) AND password = ?";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setString(1, _username);
             st.setString(2, _username);
             st.setString(3, _password);
             ResultSet rs = st.executeQuery();
             while(rs.next()){
-                u = new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5));
+                u = new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6));
                 return u;
             }
             
@@ -70,13 +70,13 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatArentFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username FROM users u LEFT OUTER JOIN contacts c ON c.theirContact_id = u.id WHERE ((c.user_id != ? OR c.user_id IS NULL) AND u.id != ?)";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url FROM users u LEFT OUTER JOIN contacts c ON c.theirContact_id = u.id WHERE ((c.user_id != ? OR c.user_id IS NULL) AND u.id != ?)";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
             st.setInt(2, u.GetId());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
-                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5)));
+                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6)));
             }
         } catch(SQLException ex){
             JOptionPane.showMessageDialog(null,ex.getMessage());
@@ -88,19 +88,29 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatAreFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username FROM users u INNER JOIN JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ?)";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ?)";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
             st.setInt(2, u.GetId());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
-                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5)));
+                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6)));
             }
         } catch(SQLException ex){
             JOptionPane.showMessageDialog(null,ex.getMessage());
             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         return usr;
+    }
+    public void SendFriendSuggestion(int myUser_id, int other_user_id){
+        try {
+            String sql = "INSERT INTO contacts(user_id, theirContact_id) VALUES(?, ?)";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, myUser_id);
+            st.setInt(2, other_user_id);
+        } catch(SQLException ex){
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);    
+        }
     }
     
 }
