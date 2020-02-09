@@ -18,10 +18,12 @@ public class RegisterForm extends javax.swing.JFrame {
     /**
      * Creates new form RegisterForm
      */
+    DatabaseConnection db;
     LoginForm lf;
     public RegisterForm(LoginForm _lf) {
         initComponents();
         lf = _lf;
+        db = new DatabaseConnection();
     }
 
     private RegisterForm() {
@@ -174,11 +176,12 @@ public class RegisterForm extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Neki je empty");
             return;
         }
-        DatabaseConnection db = new DatabaseConnection();
+        db.Open();
         db.addUser(username, email, password, name, last_name);
+        db.closeDB();
         JOptionPane.showMessageDialog(null, "You have succesfully registered");
         lf.setVisible(true);
-        this.setVisible(false);
+        this.dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**

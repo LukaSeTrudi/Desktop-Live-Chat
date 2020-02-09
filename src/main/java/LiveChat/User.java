@@ -36,6 +36,7 @@ public class User {
     private String email;
     private String username;
     private String avatar_url;
+    private String friends;
     
     public User(int _id, String _name, String _lastname, String _email, String _username, String _avatar_url){
         id = _id;
@@ -45,8 +46,20 @@ public class User {
         username = _username;
         avatar_url = _avatar_url;
     }
+    public User(int _id, String _name, String _lastname, String _email, String _username, String _avatar_url, String fri){
+        id = _id;
+        name = _name;
+        lastname = _lastname;
+        email = _email;
+        username = _username;
+        avatar_url = _avatar_url;
+        friends = fri;
+    }
     public User(){
         
+    }
+    public String isFriend(){
+        return friends;
     }
     public String GetAvatar(){
         return avatar_url;
@@ -56,38 +69,6 @@ public class User {
     }
     public String GetFullName(){
         return name + " " + lastname;
-    }
-    public JPanel getUserPanel(Color c) {
-        FlowLayout fl = new FlowLayout();
-        JPanel jp = new JPanel();
-        jp.setLayout(fl);
-        JLabel avatar = new JLabel();
-        try {
-            avatar.setIcon(new ImageIcon(new ImageIcon(new URL(avatar_url)).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
-        } catch (MalformedURLException ex) {
-            try {
-                avatar.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
-            } catch (MalformedURLException ex1) {
-                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex1);
-            }
-        }
-        JButton btn = new JButton("Add Friend");
-        btn.setActionCommand(Integer.toString(id));
-        btn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, e.getActionCommand());
-            }
-        });
-        JLabel lbl = new JLabel(GetFullName());
-        lbl.setPreferredSize(new Dimension(135, 30));
-        lbl.setToolTipText(GetFullName());
-        jp.setBackground(c);
-        jp.add(avatar);
-        jp.add(lbl);
-        jp.add(btn);
-        jp.setMaximumSize(new Dimension(300, 40));
-        return jp;
     }
     
 }

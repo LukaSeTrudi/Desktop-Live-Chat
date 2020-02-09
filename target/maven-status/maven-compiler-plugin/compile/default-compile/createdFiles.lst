@@ -1,3 +1,7 @@
-LiveChat\LoginForm$2.class
-LiveChat\LoginForm.class
-LiveChat\LoginForm$1.class
+LiveChat\LoggedInForm$1.class
+LiveChat\LoggedInForm$2.class
+LiveChat\User$1.class
+LiveChat\DatabaseConnection.class
+LiveChat\LoggedInForm$3.class
+LiveChat\LoggedInForm.class
+LiveChat\User.class

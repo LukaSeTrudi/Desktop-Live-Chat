@@ -23,8 +23,11 @@ public class LoginForm extends javax.swing.JFrame {
     /**
      * Creates new form LoginForm
      */
+    public DatabaseConnection db;
+    
     public LoginForm() {
         initComponents();
+        db = new DatabaseConnection();
     }
 
     /**
@@ -134,7 +137,6 @@ public class LoginForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         RegisterForm rf = new RegisterForm(this);
         rf.setVisible(true);
-        DatabaseConnection con = new DatabaseConnection();
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -143,13 +145,14 @@ public class LoginForm extends javax.swing.JFrame {
         // login btn
         String username = jTextField1.getText();
         String password = encodePass(jTextField2.getText());
-        DatabaseConnection db = new DatabaseConnection();
+        db.Open();
         User u = db.getUserId(username, password);
+        db.closeDB();
         if(u != null){
             //JOptionPane.showMessageDialog(null, u.GetFullName());
             LoggedInForm lfForm = new LoggedInForm(u);
             lfForm.setVisible(true);
-            this.setVisible(false);
+            this.dispose();
         } else{
             JOptionPane.showMessageDialog(null, "Invalid password or username");
         }
