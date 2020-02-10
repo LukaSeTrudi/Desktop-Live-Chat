@@ -81,10 +81,10 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatArentFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u LEFT OUTER JOIN contacts c ON c.theirContact_id = u.id WHERE "
-                    + "(u.id != ? AND (c.friends != 'YES' OR c.friends IS NULL))";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u LEFT OUTER JOIN contacts c ON c.theirContact_id = u.id WHERE (u.id != ? AND c.friends IS NULL) AND u.id IN(SELECT u1.id FROM users u1 LEFT OUTER JOIN contacts c1 ON c1.user_id = u1.id WHERE (u1.id != ? AND c1.friends IS NULL))";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
+            st.setInt(2, u.GetId());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
                 usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7)));
@@ -98,7 +98,7 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatAreFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ? AND c.friends = 1)";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ? AND c.friends = 'YES')";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
             st.setInt(2, u.GetId());
@@ -137,7 +137,21 @@ public class DatabaseConnection {
         }
         return usr;
     }
-    
+    public List<User> getSentFriendRequests(int user_id){
+        List<User> usr = new ArrayList<User>();
+        try{
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND c.friends = 'PENDING')";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, user_id);
+            ResultSet rs = st.executeQuery();
+            while(rs.next()){
+                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7)));
+            }
+        } catch(SQLException ex){
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return usr;
+    }
     public void AddFriendRequest(int user_id, int other_user_id){
         try {
             String sql = "UPDATE contacts SET friends = 'YES' WHERE user_id = ? AND theirContact_id = ?";

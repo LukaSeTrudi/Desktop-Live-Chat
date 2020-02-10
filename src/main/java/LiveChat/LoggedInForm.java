@@ -60,7 +60,7 @@ public class LoggedInForm extends javax.swing.JFrame {
             } catch (MalformedURLException ex1) {
                 Logger.getLogger(LoggedInForm.class.getName()).log(Level.INFO, null, ex1);
             }
-            Logger.getLogger(LoggedInForm.class.getName()).log(Level.INFO, null, ex);
+            //Logger.getLogger(LoggedInForm.class.getName()).log(Level.INFO, null, ex);
         }
         //jpanel4 - all contacts
         loadAllContacts();
@@ -70,16 +70,19 @@ public class LoggedInForm extends javax.swing.JFrame {
         List<User> allContacts = db.getAllContactsThatArentFriends(u);
         db.closeDB();
         jPanel5.removeAll();
+        jPanel5.revalidate();
+        jPanel5.repaint();
         int i = 0;
         for(User other_user : allContacts){
             jPanel5.add(getUserPanel(other_user, i % 2 == 0 ? Color.LIGHT_GRAY : Color.GRAY));
             i++;
         }
-        
-        /*List<User> friends = db.getAllContactsThatAreFriends(u);
+        db.Open();
+        List<User> friends = db.getAllContactsThatAreFriends(u);
+        db.closeDB();
         for(User other_user : allContacts){
             
-        }*/
+        }
     }
     public JPanel getUserPanel(User _u, Color c){
         FlowLayout fl = new FlowLayout();
@@ -167,6 +170,10 @@ public class LoggedInForm extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jButton3 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
+        jTextField2 = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jPanel7 = new javax.swing.JPanel();
+        jButton5 = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
 
@@ -217,12 +224,13 @@ public class LoggedInForm extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton4))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1)
+                        .addComponent(jButton2)
+                        .addComponent(jButton4)))
                 .addContainerGap())
         );
 
@@ -271,15 +279,44 @@ public class LoggedInForm extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Find Contacts", jPanel4);
 
+        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField2ActionPerformed(evt);
+            }
+        });
+
+        jScrollPane2.setMaximumSize(new java.awt.Dimension(165, 32767));
+
+        jPanel7.setMaximumSize(new java.awt.Dimension(165, 32767));
+        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.Y_AXIS));
+        jScrollPane2.setViewportView(jPanel7);
+
+        jButton5.setLabel("Search");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 312, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jTextField2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 331, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jTabbedPane1.addTab("My Contacts", jPanel3);
@@ -342,7 +379,7 @@ public class LoggedInForm extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        FriendRequests fr = new FriendRequests(u);
+        FriendRequests fr = new FriendRequests(u, this);
         fr.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -351,6 +388,10 @@ public class LoggedInForm extends javax.swing.JFrame {
         this.dispose();
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -392,6 +433,7 @@ public class LoggedInForm extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
@@ -400,8 +442,11 @@ public class LoggedInForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }
