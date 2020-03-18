@@ -98,10 +98,14 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatAreFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ? AND c.friends = 'YES')";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ? AND c.friends = 'YES')\n" +
+                "UNION\n" +
+                "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.user_id = u.id WHERE (c.theirContact_id = ? AND u.id != ? AND c.friends = 'YES')";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
             st.setInt(2, u.GetId());
+            st.setInt(3, u.GetId());
+            st.setInt(4, u.GetId());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
                 usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7)));

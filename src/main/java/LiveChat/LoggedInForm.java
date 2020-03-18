@@ -14,6 +14,8 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.Console;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -80,8 +82,14 @@ public class LoggedInForm extends javax.swing.JFrame {
         db.Open();
         List<User> friends = db.getAllContactsThatAreFriends(u);
         db.closeDB();
-        for(User other_user : allContacts){
-            
+        i = 0;
+        
+        jPanel7.removeAll();
+        jPanel7.revalidate();
+        jPanel7.repaint();
+        for(User other_user : friends){
+            jPanel7.add(getFriendPanel(other_user, i % 2 == 0 ? Color.LIGHT_GRAY : Color.GRAY));
+            i++;
         }
     }
     public JPanel getUserPanel(User _u, Color c){
@@ -104,27 +112,12 @@ public class LoggedInForm extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 db.Open();
-                if(db.checkFriendship(user_id, Integer.parseInt(e.getActionCommand())).equals("PENDING")){
-                    db.AddFriendRequest(Integer.parseInt(e.getActionCommand()), user_id);
-                } else{
-                    db.SendFriendSuggestion(user_id, Integer.parseInt(e.getActionCommand()));
-                }
+                db.SendFriendSuggestion(user_id, Integer.parseInt(e.getActionCommand()));
+                
                 db.closeDB();
                 //JOptionPane.showMessageDialog(null, "Added Friend");
                 loadAllContacts();
          
-            }
-        });
-        Button cancl = new Button("X");
-        cancl.setActionCommand(Integer.toString(_u.GetId()));
-        cancl.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                db.Open();
-                db.RemoveFriendRequest(user_id, Integer.parseInt(e.getActionCommand()));
-                db.closeDB();
-                //JOptionPane.showMessageDialog(null, "Removed a friend suggestion");
-                loadAllContacts();
             }
         });
         JLabel lbl = new JLabel(_u.GetFullName());
@@ -134,18 +127,57 @@ public class LoggedInForm extends javax.swing.JFrame {
         jp.add(avatar);
         jp.add(lbl);
         jp.add(btn);
-        if(_u.isFriend() != null){
-            if(_u.isFriend().equals("PENDING")){
-                btn.setEnabled(false);
-                btn.setText("Sent Request");
-                lbl.setPreferredSize(new Dimension(105, 30));
-                jp.add(cancl);
-            }
-        }
         jp.setMaximumSize(new Dimension(290, 40));
         return jp;
     }
     
+    public JPanel getFriendPanel(User _u, Color c){
+        FlowLayout fl = new FlowLayout();
+        JPanel jp = new JPanel();
+        jp.setLayout(fl);
+        JLabel avatar = new JLabel();
+        try {
+            avatar.setIcon(new ImageIcon(new ImageIcon(new URL(_u.GetAvatar())).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+        } catch (MalformedURLException ex) {
+            try {
+                avatar.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+            } catch (MalformedURLException ex1) {
+                Logger.getLogger(User.class.getName()).log(Level.INFO, null, ex1);
+            }
+        }
+        JButton btn = new JButton("Open Chat");
+        btn.setActionCommand(Integer.toString(_u.GetId()));
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //JOptionPane.showMessageDialog(null, "Added Friend");
+                loadAllContacts();
+         
+            }
+        });
+        JLabel menu = new JLabel();
+        try {
+            menu = new JLabel(new ImageIcon(new ImageIcon(new URL("https://www.stickpng.com/assets/images/588a64d2d06f6719692a2d0e.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(LoggedInForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        menu.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                
+                loadAllContacts();
+            }
+        });
+        JLabel lbl = new JLabel(_u.GetFullName());
+        lbl.setPreferredSize(new Dimension(100, 30));
+        lbl.setToolTipText(_u.GetFullName());
+        jp.setBackground(c);
+        jp.add(avatar);
+        jp.add(lbl);
+        jp.add(btn);
+        jp.add(menu);
+        jp.setMaximumSize(new Dimension(290, 40));
+        return jp;
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
