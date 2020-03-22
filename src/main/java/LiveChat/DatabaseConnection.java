@@ -28,10 +28,11 @@ public class DatabaseConnection {
     public void Open(){
         try {
             conn = DriverManager.getConnection(
-                    "jdbc:mysql://remotemysql.com:3306/kO86YXWwmm", "kO86YXWwmm", "fFliBClX9p"
+                    "jdbc:postgresql://database-livechat.cgnos0jav4qi.eu-central-1.rds.amazonaws.com:5432/livechat","postgres","postgres"
+                    //"jdbc:mysql://remotemysql.com:3306/kO86YXWwmm", "kO86YXWwmm", "fFliBClX9p"
             );
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,"Cant connect to database");
+            JOptionPane.showMessageDialog(null,"Cant connect to database, "+ ex.getMessage());
             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -81,13 +82,22 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatArentFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u LEFT OUTER JOIN contacts c ON c.theirContact_id = u.id WHERE (u.id != ? AND c.friends IS NULL) AND u.id IN(SELECT u1.id FROM users u1 LEFT OUTER JOIN contacts c1 ON c1.user_id = u1.id WHERE (u1.id != ? AND c1.friends IS NULL))";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url FROM users u WHERE u.id != ?\n" +
+                        "EXCEPT\n" +
+                        "(SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url FROM users u\n" +
+                        "LEFT OUTER JOIN contacts c ON c.contact_id = u.id WHERE (c.user_id = ? AND c.friends IS NOT NULL)\n" +
+                        "UNION\n" +
+                        "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url FROM users u\n" +
+                        "LEFT OUTER JOIN contacts c ON c.user_id = u.id WHERE (c.contact_id = ? AND c.friends = 'YES')\n" +
+                        ")";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
             st.setInt(2, u.GetId());
+            st.setInt(3, u.GetId());
             ResultSet rs = st.executeQuery();
+             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, u.GetId());
             while(rs.next()){
-                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7)));
+                usr.add(new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6)));
             }
         } catch(SQLException ex){
             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
@@ -98,9 +108,9 @@ public class DatabaseConnection {
     public List<User> getAllContactsThatAreFriends(User u){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND u.id != ? AND c.friends = 'YES')\n" +
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.contact_id = u.id WHERE (c.user_id = ? AND u.id != ? AND c.friends = 'YES')\n" +
                 "UNION\n" +
-                "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.user_id = u.id WHERE (c.theirContact_id = ? AND u.id != ? AND c.friends = 'YES')";
+                "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url,c.friends FROM users u INNER JOIN contacts c ON c.user_id = u.id WHERE (c.contact_id = ? AND u.id != ? AND c.friends = 'YES')";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, u.GetId());
             st.setInt(2, u.GetId());
@@ -117,7 +127,7 @@ public class DatabaseConnection {
     }
     public void SendFriendSuggestion(int myUser_id, int other_user_id){
         try {
-            String sql = "INSERT INTO contacts(user_id, theirContact_id, friends) VALUES(?, ?, 'PENDING')";
+            String sql = "SELECT addfriend(?,?)";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, myUser_id);
             st.setInt(2, other_user_id);
@@ -129,7 +139,7 @@ public class DatabaseConnection {
     public List<User> getFriendRequests(int user_id){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u INNER JOIN contacts c ON c.user_id = u.id WHERE (c.theirContact_id = ? AND c.friends = 'PENDING')";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u INNER JOIN contacts c ON c.user_id = u.id WHERE (c.contact_id = ? AND c.friends = 'PENDING')";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, user_id);
             ResultSet rs = st.executeQuery();
@@ -144,7 +154,7 @@ public class DatabaseConnection {
     public List<User> getSentFriendRequests(int user_id){
         List<User> usr = new ArrayList<User>();
         try{
-            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u INNER JOIN contacts c ON c.theirContact_id = u.id WHERE (c.user_id = ? AND c.friends = 'PENDING')";
+            String sql = "SELECT u.id, u.name, u.lastname, u.email, u.username, u.avatar_url, c.friends FROM users u INNER JOIN contacts c ON c.contact_id = u.id WHERE (c.user_id = ? AND c.friends = 'PENDING')";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, user_id);
             ResultSet rs = st.executeQuery();
@@ -158,7 +168,7 @@ public class DatabaseConnection {
     }
     public void AddFriendRequest(int user_id, int other_user_id){
         try {
-            String sql = "UPDATE contacts SET friends = 'YES' WHERE user_id = ? AND theirContact_id = ?";
+            String sql = "SELECT addfriend(?,?)";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, user_id);
             st.setInt(2, other_user_id);
@@ -170,7 +180,7 @@ public class DatabaseConnection {
     
     public void RemoveFriendRequest(int user_id, int other_user_id){
         try {
-            String sql = "DELETE FROM contacts WHERE user_id = ? AND theirContact_id = ?";
+            String sql = "DELETE FROM contacts WHERE user_id = ? AND contact_id = ?";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, user_id);
             st.setInt(2, other_user_id);
@@ -183,7 +193,7 @@ public class DatabaseConnection {
     public String checkFriendship(int user_id, int other_user_id){
         String fr = "NO";
         try {
-            String sql = "SELECT friends FROM contacts WHERE user_id = ? AND theirContact_id = ?";
+            String sql = "SELECT friends FROM contacts WHERE user_id = ? AND contact_id = ?";
             PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
             st.setInt(1, other_user_id);
             st.setInt(2, user_id);
@@ -195,5 +205,26 @@ public class DatabaseConnection {
             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         return fr;
+    }
+    public int getChatId(int user_id, int other_user_id){
+        int id = 0;
+        try{
+            String sql = "SELECT getChatId(?,?)";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, user_id);
+            st.setInt(2, other_user_id);
+            ResultSet rs = st.executeQuery();
+            while(rs.next()){
+                id = rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return id;
+    }
+    public List<Message> getMessages(int chat_id){
+        List<Message> messages = new ArrayList<Message>();
+        
+        return messages;
     }
 }
