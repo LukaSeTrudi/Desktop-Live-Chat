@@ -6,6 +6,7 @@
 package LiveChat;
 
 import static LiveChat.User.user_id;
+import java.awt.Adjustable;
 import java.awt.Button;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -14,6 +15,9 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Console;
@@ -22,11 +26,16 @@ import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 /**
  *
@@ -37,14 +46,16 @@ public class LoggedInForm extends javax.swing.JFrame {
     /**
      * Creates new form LoggedInForm
      */
+    Timer bg_timer;
     public DatabaseConnection db;
-    public static int chat_id;
-    User u;
+    public int chat_id;
+    public User u;
+    public User otherUser;
+    int last_msg = 0;
+
+    ImageIcon opt = new ImageIcon(new ImageIcon("resources/options-icon.png").getImage().getScaledInstance(15, 15, Image.SCALE_SMOOTH));
     public LoggedInForm() {
         initComponents();
-        u = new User(7, "Luka", "Pavcnik", "neki", "neki", "s", "USER");
-        User.user_id = u.GetId();
-        db = new DatabaseConnection();
     }
     public LoggedInForm(User _u){
         initComponents();
@@ -136,13 +147,43 @@ public class LoggedInForm extends javax.swing.JFrame {
         return jp;
     }
     public void loadMessages(){
+        if(chat_id < 0)
+            return;
+        db.Open();
+        List<Message> messages = db.getMessages(chat_id);
+        db.closeDB();
+        if(messages.get(messages.size()-1).id == last_msg){
+            return;
+        } else
+            last_msg = messages.get(messages.size()-1).id;
+        jPanel11.removeAll();
+        jPanel11.revalidate();
+        jPanel11.repaint();
         
+        for(Message m : messages){
+            if(m.sent_id == user_id){
+                jPanel11.add(getTextLabel(m.msg, m.timestamp, u));
+            } else {
+                jPanel11.add(getTextLabel(m.msg, m.timestamp, otherUser));
+            }
+        }
+        scrollToBottom(jScrollPane4);
     }
     public void OpenChat(int other_user){
         db.Open();
         chat_id = db.getChatId(user_id, other_user);
+        otherUser = db.GetUser(other_user);
         db.closeDB();
-        loadMessages();
+        jLabel2.setText(otherUser.GetFullName());
+        bg_timer =new Timer(2000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadMessages();
+            }
+        });
+        bg_timer.start();
+        jFormattedTextField1.setEditable(true);
+        //loadMessages();
     }
     public JPanel getFriendPanel(User _u, Color c){
         FlowLayout fl = new FlowLayout();
@@ -169,18 +210,10 @@ public class LoggedInForm extends javax.swing.JFrame {
          
             }
         });
-        JLabel menu = new JLabel();
-        try {
-            menu = new JLabel(new ImageIcon(new ImageIcon(new URL("https://www.stickpng.com/assets/images/588a64d2d06f6719692a2d0e.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(LoggedInForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        menu.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                
-                loadAllContacts();
-            }
-        });
+        JButton menu = new JButton(opt);
+        //menu.setSize(10,20);
+        menu.setMaximumSize(getSize());
+        System.out.println(opt.getImage());
         JLabel lbl = new JLabel(_u.GetFullName());
         lbl.setPreferredSize(new Dimension(100, 30));
         lbl.setToolTipText(_u.GetFullName());
@@ -192,7 +225,70 @@ public class LoggedInForm extends javax.swing.JFrame {
         jp.setMaximumSize(new Dimension(290, 40));
         return jp;
     }
-    
+    public void SendMessage(){
+        if(chat_id > 0 && jFormattedTextField1.getText().length() > 0){
+            db.Open();
+            db.sendMessage(chat_id, user_id, jFormattedTextField1.getText());
+            db.closeDB();
+            jFormattedTextField1.setText("");
+            loadMessages();
+        }
+    }
+    public void scrollToBottom(JScrollPane scrollPane) {
+        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
+        AdjustmentListener downScroller = new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
+                adjustable.setValue(adjustable.getMaximum());
+                verticalBar.removeAdjustmentListener(this);
+            }
+        };
+        verticalBar.addAdjustmentListener(downScroller);
+    }
+    public JLabel getTextLabel(String text, String time, User sender){
+        JLabel jLabel = new JLabel();
+        jLabel.setFont(new java.awt.Font("Georgia", 0, 12)); // NOI18N
+        if(sender.GetId() == user_id){
+            jLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            jLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+            ImageIcon image;
+            try {
+                image = new ImageIcon(new ImageIcon(new URL(sender.GetAvatar())).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
+                jLabel.setIcon(image);
+            } catch (MalformedURLException ex) {
+                try {
+                jLabel.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+                } catch (MalformedURLException ex1) {
+                    Logger.getLogger(User.class.getName()).log(Level.INFO, null, ex1.getMessage() + " omggg");
+                }
+            }
+            jLabel.setBackground(Color.GRAY);
+        } else {
+            jLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+            jLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+            ImageIcon image;
+            try {
+                image = new ImageIcon(new ImageIcon(new URL(sender.GetAvatar())).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
+                jLabel.setIcon(image);
+            } catch (MalformedURLException ex) {
+                try {
+                jLabel.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+                } catch (MalformedURLException ex1) {
+                    Logger.getLogger(User.class.getName()).log(Level.INFO, null, ex1.getMessage());
+                }
+            }
+            jLabel.setBackground(Color.GREEN);
+        }
+        //jLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/LiveChat/images/Dizzy-Wallpaper.jpg"))); // NOI18N
+        jLabel.setText(text);
+        jLabel.setToolTipText(time);
+        jLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jLabel.setMaximumSize(new java.awt.Dimension(380, 30));
+        jLabel.setMinimumSize(new java.awt.Dimension(3, 30));
+        jLabel.setPreferredSize(new Dimension(100, 30));
+        return jLabel;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -223,8 +319,8 @@ public class LoggedInForm extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jPanel8 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jPanel11 = new javax.swing.JPanel();
         jPanel9 = new javax.swing.JPanel();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
         jButton6 = new javax.swing.JButton();
@@ -411,14 +507,25 @@ public class LoggedInForm extends javax.swing.JFrame {
                 .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE))
         );
 
-        jPanel8.setBackground(new java.awt.Color(204, 255, 255));
-        jPanel8.setMinimumSize(new java.awt.Dimension(391, 303));
-        jPanel8.setLayout(new javax.swing.BoxLayout(jPanel8, javax.swing.BoxLayout.Y_AXIS));
-        jScrollPane3.setViewportView(jPanel8);
+        jScrollPane4.setMaximumSize(new java.awt.Dimension(165, 32767));
 
-        jFormattedTextField1.setText("jFormattedTextField1");
+        jPanel11.setMaximumSize(new java.awt.Dimension(165, 32767));
+        jPanel11.setLayout(new javax.swing.BoxLayout(jPanel11, javax.swing.BoxLayout.Y_AXIS));
+        jScrollPane4.setViewportView(jPanel11);
+
+        jFormattedTextField1.setEditable(false);
+        jFormattedTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jFormattedTextField1KeyPressed(evt);
+            }
+        });
 
         jButton6.setText("Send");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -448,21 +555,28 @@ public class LoggedInForm extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3)
                     .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(23, 23, 23)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(335, 335, 335)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(57, 57, 57)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(61, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -509,6 +623,18 @@ public class LoggedInForm extends javax.swing.JFrame {
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here: // send message
+        SendMessage();
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jFormattedTextField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jFormattedTextField1KeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER){
+            SendMessage();
+        }
+    }//GEN-LAST:event_jFormattedTextField1KeyPressed
 
     /**
      * @param args the command line arguments
@@ -558,17 +684,17 @@ public class LoggedInForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;

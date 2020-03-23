@@ -60,6 +60,22 @@ public class DatabaseConnection {
             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    public User GetUser(int _id){
+        User u;
+        try{
+            String sql = "SELECT id, name, lastname, email, username, avatar_url FROM users WHERE id = ?";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, _id);
+            ResultSet rs = st.executeQuery();
+            while(rs.next()){
+                u = new User(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getString(4), rs.getString(5), rs.getString(6), "USER");
+                return u;
+            }
+            
+        } catch(SQLException ex){
+        }
+        return null;
+    }
     public User getUserId(String _username, String _password){
         User u;
         try{
@@ -224,7 +240,29 @@ public class DatabaseConnection {
     }
     public List<Message> getMessages(int chat_id){
         List<Message> messages = new ArrayList<Message>();
-        
+        try{
+            String sql = "SELECT * FROM messages WHERE chat_id = ? ORDER BY date ASC";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, chat_id);
+            ResultSet rs = st.executeQuery();
+            while(rs.next()){
+                messages.add(new Message(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getInt(5), rs.getInt(5)));
+            }
+        } catch(SQLException ex){
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return messages;
+    }
+    public void sendMessage(int chat_id, int sender, String msg){
+        try {
+            String sql = "INSERT INTO messages(message, chat_id, sent_id) VALUES (?, ?, ?)";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setString(1, msg);
+            st.setInt(2, chat_id);
+            st.setInt(3, sender);
+            st.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

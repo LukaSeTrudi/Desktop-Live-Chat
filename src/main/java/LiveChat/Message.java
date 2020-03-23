@@ -18,7 +18,7 @@ public class Message {
     public int sent_id;
     public int chat_id;
     
-    public Message(int _id, String _msg, String _time, int _sent, int _chat){    
+    public Message(int _id, String _msg, String _time, int _chat, int _sent){    
         id = _id;
         msg = _msg;
         timestamp = _time;
