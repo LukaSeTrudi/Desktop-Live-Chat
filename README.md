@@ -1,10 +1,6 @@
 # Live Chat
 
-This is a live chat application created with JavaSwing in Netbeans. It has features like adding friends and chatting with them
-
-# Live Chat
-
-> Live Chat application
+> Chatting with friends
 
 > Created with Java Swing in Netbeans
 
@@ -81,6 +77,7 @@ git clone https://github.com/LukaSeTrudi/Desktop-Live-Chat to/your/file/location
 - Have fun
 
 ***Login***
+
 [![login](./addedFiles/login.png)]()
 
 - Instantly login or register
@@ -94,13 +91,13 @@ git clone https://github.com/LukaSeTrudi/Desktop-Live-Chat to/your/file/location
 
 ## External
 
-# ER DIAGRAM
+### ER DIAGRAM
 
 This is ER Diagram made in Toad Data Modeler
 
 ![ER DIAGRAM](./addedFiles/Screenshot_2.png);
 
-# Trello link
+### Trello link
 
 [Trello] (https://trello.com/b/5AanZCZr/livechat)
 
