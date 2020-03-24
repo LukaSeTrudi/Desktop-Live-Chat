@@ -1,0 +1,25 @@
+cmd.exe
+/X
+/C
+""C:\Program Files\Java\jdk-13.0.2\bin\javadoc.exe" @options @packages"
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\allclasses-index.html = 1584968502263
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\allpackages-index.html = 1584968502281
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\constant-values.html = 1584968501935
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\deprecated-list.html = 1584968502186
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\element-list = 1584968501896
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\help-doc.html = 1584968502303
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\index-all.html = 1584968502245
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\index.html = 1584968502293
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\member-search-index.js = 1584968502236
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\member-search-index.zip = 1584968502239
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\options = 1584968500120
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\overview-tree.html = 1584968502167
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\package-search-index.js = 1584968502213
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\package-search-index.zip = 1584968502219
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\packages = 1584968500121
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\script.js = 1584968502322
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\search.js = 1584968502325
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\serialized-form.html = 1584968501966
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\stylesheet.css = 1584968502315
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\type-search-index.js = 1584968502227
+C:\Users\lukap\Documents\NetBeansProjects\livechat_v1\target\apidocs\type-search-index.zip = 1584968502229

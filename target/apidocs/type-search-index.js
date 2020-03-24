@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"LiveChat","l":"DatabaseConnection"},{"p":"LiveChat","l":"FriendRequests"},{"p":"LiveChat","l":"LoggedInForm"},{"p":"LiveChat","l":"LoginForm"},{"p":"LiveChat","l":"Message"},{"p":"LiveChat","l":"RecentChat"},{"p":"LiveChat","l":"RegisterForm"},{"p":"LiveChat","l":"User"}]

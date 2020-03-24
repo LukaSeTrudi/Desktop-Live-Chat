@@ -265,4 +265,30 @@ public class DatabaseConnection {
             Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    public void readMessages(int chat_id, int user_id){
+        try {
+            String sql = "SELECT readmsg(?, ?)";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, chat_id);
+            st.setInt(2, user_id);
+            st.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public List<RecentChat> getRecents(int user_id) {
+        List<RecentChat> recents = new ArrayList<RecentChat>();
+        try{
+            String sql = "SELECT * FROM messages WHERE chat_id = ? ORDER BY date ASC";
+            PreparedStatement st = (PreparedStatement) conn.prepareStatement(sql);
+            st.setInt(1, user_id);
+            ResultSet rs = st.executeQuery();
+            while(rs.next()){
+                //recents.add(new Message(rs.getInt(1), rs.getString(2),rs.getString(3),rs.getInt(5), rs.getInt(5)));
+            }
+        } catch(SQLException ex){
+            Logger.getLogger(DatabaseConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return recents;
+    }
 }

@@ -77,6 +77,8 @@ public class LoggedInForm extends javax.swing.JFrame {
             //Logger.getLogger(LoggedInForm.class.getName()).log(Level.INFO, null, ex);
         }
         //jpanel4 - all contacts
+        
+        scrollToBottom(jScrollPane4);
         loadAllContacts();
     }
     public void loadAllContacts(){
@@ -154,12 +156,11 @@ public class LoggedInForm extends javax.swing.JFrame {
         db.closeDB();
         if(messages.get(messages.size()-1).id == last_msg){
             return;
-        } else
-            last_msg = messages.get(messages.size()-1).id;
+        }
+        last_msg = messages.get(messages.size()-1).id;
         jPanel11.removeAll();
         jPanel11.revalidate();
         jPanel11.repaint();
-        
         for(Message m : messages){
             if(m.sent_id == user_id){
                 jPanel11.add(getTextLabel(m.msg, m.timestamp, u));
@@ -167,7 +168,9 @@ public class LoggedInForm extends javax.swing.JFrame {
                 jPanel11.add(getTextLabel(m.msg, m.timestamp, otherUser));
             }
         }
-        scrollToBottom(jScrollPane4);
+        db.Open();
+        db.readMessages(chat_id, user_id);
+        db.closeDB();
     }
     public void OpenChat(int other_user){
         db.Open();
@@ -248,17 +251,17 @@ public class LoggedInForm extends javax.swing.JFrame {
     }
     public JLabel getTextLabel(String text, String time, User sender){
         JLabel jLabel = new JLabel();
-        jLabel.setFont(new java.awt.Font("Georgia", 0, 12)); // NOI18N
+        jLabel.setFont(new java.awt.Font("Georgia", 0, 14)); // NOI18N
         if(sender.GetId() == user_id){
             jLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             jLabel.setHorizontalTextPosition(SwingConstants.LEFT);
             ImageIcon image;
             try {
-                image = new ImageIcon(new ImageIcon(new URL(sender.GetAvatar())).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
+                image = new ImageIcon(new ImageIcon(new URL(sender.GetAvatar())).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
                 jLabel.setIcon(image);
             } catch (MalformedURLException ex) {
                 try {
-                jLabel.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+                jLabel.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
                 } catch (MalformedURLException ex1) {
                     Logger.getLogger(User.class.getName()).log(Level.INFO, null, ex1.getMessage() + " omggg");
                 }
@@ -269,23 +272,22 @@ public class LoggedInForm extends javax.swing.JFrame {
             jLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
             ImageIcon image;
             try {
-                image = new ImageIcon(new ImageIcon(new URL(sender.GetAvatar())).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
+                image = new ImageIcon(new ImageIcon(new URL(sender.GetAvatar())).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
                 jLabel.setIcon(image);
             } catch (MalformedURLException ex) {
                 try {
-                jLabel.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT)));
+                jLabel.setIcon(new ImageIcon(new ImageIcon(new URL("https://www.w3schools.com/howto/img_avatar.png")).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
                 } catch (MalformedURLException ex1) {
                     Logger.getLogger(User.class.getName()).log(Level.INFO, null, ex1.getMessage());
                 }
             }
             jLabel.setBackground(Color.GREEN);
         }
-        //jLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/LiveChat/images/Dizzy-Wallpaper.jpg"))); // NOI18N
         jLabel.setText(text);
         jLabel.setToolTipText(time);
         jLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jLabel.setMaximumSize(new java.awt.Dimension(380, 30));
-        jLabel.setMinimumSize(new java.awt.Dimension(3, 30));
+        jLabel.setMaximumSize(new java.awt.Dimension(380, 35));
+        jLabel.setMinimumSize(new java.awt.Dimension(3, 35));
         jLabel.setPreferredSize(new Dimension(100, 30));
         return jLabel;
     }
@@ -485,10 +487,8 @@ public class LoggedInForm extends javax.swing.JFrame {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
-        jPanel10.setBackground(new java.awt.Color(153, 204, 255));
-
-        jLabel2.setFont(new java.awt.Font("Georgia", 1, 12)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(51, 153, 0));
+        jLabel2.setFont(new java.awt.Font("Georgia", 1, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 102, 102));
         jLabel2.setText("No User Specified");
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
@@ -497,7 +497,7 @@ public class LoggedInForm extends javax.swing.JFrame {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel2)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
@@ -509,6 +509,7 @@ public class LoggedInForm extends javax.swing.JFrame {
 
         jScrollPane4.setMaximumSize(new java.awt.Dimension(165, 32767));
 
+        jPanel11.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 5));
         jPanel11.setMaximumSize(new java.awt.Dimension(165, 32767));
         jPanel11.setLayout(new javax.swing.BoxLayout(jPanel11, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane4.setViewportView(jPanel11);
