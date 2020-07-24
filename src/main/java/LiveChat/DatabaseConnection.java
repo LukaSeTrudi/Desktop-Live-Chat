@@ -28,8 +28,8 @@ public class DatabaseConnection {
     public void Open(){
         try {
             conn = DriverManager.getConnection(
-                    "jdbc:postgresql://database-livechat.cgnos0jav4qi.eu-central-1.rds.amazonaws.com:5432/livechat","postgres","postgres"
-                    //"jdbc:mysql://remotemysql.com:3306/kO86YXWwmm", "kO86YXWwmm", "fFliBClX9p"
+                    // insert connection here
+                    //
             );
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null,"Cant connect to database, "+ ex.getMessage());
